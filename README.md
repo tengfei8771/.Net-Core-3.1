@@ -1,2 +1,2 @@
-# WY_APIV2.2
-CORE 2.2
+# .Net-Core-3.1
+.Net-Core-3.1
