@@ -42,25 +42,25 @@ namespace WebApi
                 // 设置时间格式
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
-            #region 关系型数据库连接
-            if (this.Configuration.GetSection("RDBMSConfig").GetValue<bool>("UseingStatus"))
-            {
-                string DBtype = this.Configuration.GetSection("RDBMSConfig").GetSection("DataBaseType").Value;
-                switch (DBtype.ToUpper())
-                {
-                    case "SQLSEVER":
-                        services.AddDbContext<Models.AppContext>(options => options.UseSqlServer(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
-                        break;
-                    case "ORACLE":
-                        services.AddDbContext<Models.AppContext>(options => options.UseOracle(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
-                        break;
-                    case "MYSQL":
-                        services.AddDbContext<Models.AppContext>(options => options.UseMySQL(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
-                        break;
-                    default:
-                        throw new Exception("配置文件中的数据库类型有误!请修改后启动程序！");
-                }
-            }
+            #region 关系型数据库连接(不用了)
+            //if (this.Configuration.GetSection("RDBMSConfig").GetValue<bool>("UseingStatus"))
+            //{
+            //    string DBtype = this.Configuration.GetSection("RDBMSConfig").GetSection("DataBaseType").Value;
+            //    switch (DBtype.ToUpper())
+            //    {
+            //        case "SQLSEVER":
+            //            services.AddDbContext<Models.AppContext>(options => options.UseSqlServer(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
+            //            break;
+            //        case "ORACLE":
+            //            services.AddDbContext<Models.AppContext>(options => options.UseOracle(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
+            //            break;
+            //        case "MYSQL":
+            //            services.AddDbContext<Models.AppContext>(options => options.UseMySQL(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
+            //            break;
+            //        default:
+            //            throw new Exception("配置文件中的数据库类型有误!请修改后启动程序！");
+            //    }
+            //}
             #endregion
         }
 
