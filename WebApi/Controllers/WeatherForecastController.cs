@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using WebApi.Common;
 
 namespace WebApi.Controllers
 {
     [ApiController]
+    [NeedNotValidate]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
@@ -22,7 +25,7 @@ namespace WebApi.Controllers
         {
             _logger = logger;
         }
-
+        [NeedValidate]
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {

@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using UIDP.UTILITY.JWTHelper;
+using Utils;
+using WebApi.Common;
 
 namespace PublicWebApi.Common.Validator
 {
@@ -22,7 +27,8 @@ namespace PublicWebApi.Common.Validator
 
         public Task Invoke(HttpContext httpContext)
         {
-            if (!WhiteListHelper.IsPass(httpContext))
+            bool flag=GetNeedOrNeedNotFlag.GetFlag(httpContext);
+            if (true)
             {
                 HttpRequest request = httpContext.Request;
                 if (!request.Headers.TryGetValue("X-Token", out var apiKeyHeaderValues))

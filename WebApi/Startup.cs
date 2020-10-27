@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using PublicWebApi.Common.Validator;
 
 namespace WebApi
 {
@@ -138,12 +139,9 @@ namespace WebApi
             });
             app.UseSession();
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
-            app.UseAuthorization();
-            
-
+            app.UseAuthentication();
+            app.UseMiddleware<JwtMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
