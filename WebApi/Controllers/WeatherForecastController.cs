@@ -10,7 +10,7 @@ using WebApi.Common;
 namespace WebApi.Controllers
 {
     [ApiController]
-    [NeedNotValidate]
+    [NeedValidate]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
@@ -25,7 +25,7 @@ namespace WebApi.Controllers
         {
             _logger = logger;
         }
-        [NeedValidate]
+        [NeedNotValidate]
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {

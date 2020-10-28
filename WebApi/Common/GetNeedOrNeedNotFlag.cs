@@ -29,7 +29,7 @@ namespace WebApi.Common
             }
             else
             {
-                return FirstIndex > SecondIndex ? false : true;
+                return FirstIndex > SecondIndex ? !NeedNot.NeedNotValidate : NeedNot.NeedNotValidate;
             }
         }
     }
