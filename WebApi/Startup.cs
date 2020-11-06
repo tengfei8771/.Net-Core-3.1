@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,6 +21,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using PublicWebApi.Common.Validator;
+using WebApi.Common.EFCoreCommon;
 
 namespace WebApi
 {
@@ -37,6 +39,7 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            DiagnosticListener.AllListeners.Subscribe(new CommandListener());
             services.AddCors(options =>
             {
                 options.AddPolicy("any", builder =>
@@ -101,26 +104,7 @@ namespace WebApi
                 // 设置时间格式
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
-            #region 关系型数据库连接(不用了)
-            //if (this.Configuration.GetSection("RDBMSConfig").GetValue<bool>("UseingStatus"))
-            //{
-            //    string DBtype = this.Configuration.GetSection("RDBMSConfig").GetSection("DataBaseType").Value;
-            //    switch (DBtype.ToUpper())
-            //    {
-            //        case "SQLSEVER":
-            //            services.AddDbContext<Models.AppContext>(options => options.UseSqlServer(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
-            //            break;
-            //        case "ORACLE":
-            //            services.AddDbContext<Models.AppContext>(options => options.UseOracle(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
-            //            break;
-            //        case "MYSQL":
-            //            services.AddDbContext<Models.AppContext>(options => options.UseMySQL(this.Configuration.GetSection("RDBMSConfig").GetSection("DBtype").Value));
-            //            break;
-            //        default:
-            //            throw new Exception("配置文件中的数据库类型有误!请修改后启动程序！");
-            //    }
-            //}
-            #endregion
+            services.AddDbContext<Entity.Models.AppDBContext>(/*options => options.UseSqlServer("server=localhost;user id=sa;pwd=sa;database=AppDB")*/);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

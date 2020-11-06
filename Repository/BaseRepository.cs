@@ -1,55 +1,57 @@
 ﻿using EFCore.BulkExtensions;
+using Entity.Models;
 using IRepository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Repository
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        private readonly DbContext dbContext;
+        private readonly AppDBContext _appDBContext;
 
-        public BaseRepository(DbContext dbContext)
+        public BaseRepository(AppDBContext _appDBContext)
         {
-            this.dbContext = dbContext;
+            this._appDBContext = _appDBContext;
         }
         public bool Delete(T entity)
         {
-            dbContext.Remove(entity);
-            return dbContext.SaveChanges()>0;
+            _appDBContext.Remove(entity);
+            return _appDBContext.SaveChanges()>0;
         }
 
         public void DeleteAll(List<T> list)
         {
-            dbContext.BulkDelete(list);
+            _appDBContext.BulkDelete(list);
         }
 
         public void ExecuteSqlCommand(string sql)
         {
-            dbContext.Database.ExecuteSqlRaw(sql);
+            _appDBContext.Database.ExecuteSqlRaw(sql);
         }
 
         public dynamic FromSql(string sql)
         {
-            return dbContext.Database.ExecuteSqlRaw(sql);
+            return _appDBContext.Database.ExecuteSqlRaw(sql);
         }
 
-        public T GetInfo(Expression<Func<T, bool>> predicate)
+        public List<T> GetInfo(Expression<Func<T, bool>> predicate)
         {
-            throw new NotImplementedException();
+            return _appDBContext.Set<T>().Where(predicate).ToList();
         }
 
         public bool Insert(T entity)
         {
-            dbContext.Add(entity);
-            return dbContext.SaveChanges() > 0;
+            _appDBContext.Add(entity);
+            return _appDBContext.SaveChanges() > 0;
         }
 
         public void InsertAll(List<T> list)
         {
-            dbContext.BulkInsert(list);
+            _appDBContext.BulkInsert(list);
         }
 
         public bool Update(T entity)

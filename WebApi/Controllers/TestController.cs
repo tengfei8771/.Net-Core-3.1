@@ -13,13 +13,16 @@ namespace WebApi.Controllers
     public class TestController : ControllerBase
     {
         private ITestService testService;
-        public TestController(ITestService testService)
+        private IUserService userService;
+        public TestController(ITestService testService, IUserService userService)
         {
             this.testService = testService;
+            this.userService = userService;
         }
         [HttpGet]
         public string Test()
         {
+            var list = userService.GetUserList();
             return testService.Test();
         }
     }

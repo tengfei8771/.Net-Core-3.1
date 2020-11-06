@@ -9,10 +9,9 @@ namespace IRepository
         bool Insert(T entity);
         bool Update(T entity);
         bool Delete(T entity);
-        T GetInfo(Expression<Func<T, bool>> predicate);
+        List<T> GetInfo(Expression<Func<T, bool>> predicate);
         dynamic FromSql(string sql);
         void ExecuteSqlCommand(string sql);
-
         void InsertAll(List<T> list);
 
         void DeleteAll(List<T> list);
