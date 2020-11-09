@@ -104,7 +104,7 @@ namespace WebApi
                 // 设置时间格式
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
-            services.AddDbContext<Entity.Models.AppDBContext>(/*options => options.UseSqlServer("server=localhost;user id=sa;pwd=sa;database=AppDB")*/);
+            services.AddDbContext<Entity.Models.AppDBContext>(options => options.UseSqlServer("server=localhost;user id=sa;pwd=sa;database=AppDB"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
