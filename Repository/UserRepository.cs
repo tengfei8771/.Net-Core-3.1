@@ -1,8 +1,5 @@
 ﻿using Entity.Models;
 using IRepository;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Repository
 {

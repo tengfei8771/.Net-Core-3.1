@@ -21,15 +21,19 @@ namespace Utils
             {
                 return connectConfig.MasterConnectionString;
             }
+            else
+            {
+                return "";
+            }
         }
         private static string GetSlaveConnectionStringByRoundRobin()
         {
-            
+            return "";
         }
 
         private static string GetSlaveConnectionStringWeight()
         {
-
+            return "";
         }
     }
 
@@ -45,7 +49,7 @@ namespace Utils
         public string ConnectionString { get; set; }
         public decimal weight { get; set; }
     }
-    enum LoadBalanceType
+    public enum LoadBalanceType
     {
         RoundRobin,
         Weight
