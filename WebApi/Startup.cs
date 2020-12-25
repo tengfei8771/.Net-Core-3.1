@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Autofac;
+using ConsulBuilder;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -56,7 +57,7 @@ namespace WebApi
             {
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
+            services.AddConsul();
             //启用内存缓存(该步骤需在AddSession()调用前使用)
             services.AddDistributedMemoryCache();//启用session之前必须先添加内存
             //services.AddSession();
@@ -121,6 +122,7 @@ namespace WebApi
                 c.SwaggerEndpoint($"/swagger/v1/swagger.json", "PublicWebApi v1");
 
             });
+            app.UseConsul();
             app.UseSession();
             app.UseHttpsRedirection();
             app.UseRouting();

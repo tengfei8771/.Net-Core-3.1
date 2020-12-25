@@ -61,7 +61,7 @@ namespace WebApi.Common.EFCoreCommon
                 {
                     command.Connection.Open();
                 }
-                catch(Exception e)
+                catch
                 { 
                     throw new Exception($"数据库打开失败,请检查数据库连接!{command.Connection.ConnectionString}");
                 }
