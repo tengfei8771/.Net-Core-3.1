@@ -71,7 +71,7 @@ namespace WebApi
             services.AddSwaggerGen(options =>
             {
                 // 添加文档信息
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "PublicWebApi", Version = "v1" });
+                options.SwaggerDoc("PublicWebApi", new OpenApiInfo { Title = "PublicWebApi", Version = "v1" });
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 // 获取xml文件路径
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -119,7 +119,7 @@ namespace WebApi
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"/swagger/v1/swagger.json", "PublicWebApi v1");
+                c.SwaggerEndpoint($"/swagger/PublicWebApi/swagger.json", "PublicWebApi v1");
 
             });
             app.UseConsul();

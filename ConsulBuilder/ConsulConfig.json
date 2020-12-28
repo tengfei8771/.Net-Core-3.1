@@ -1,5 +1,5 @@
 {
-  "ConsulAddress": "http://localhost:5000",
+  "ConsulAddress": "http://localhost:8500",
   "ServiceName": "PublicWebApi",
   "HealthCheck": "/HealthCheck",
   "ServiceAddress": "http://localhost:5000"

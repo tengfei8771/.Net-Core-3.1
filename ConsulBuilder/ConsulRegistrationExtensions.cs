@@ -58,7 +58,7 @@ namespace ConsulBuilder
                     // 健康检查地址
                     HTTP = $"{uri.Scheme}://{uri.Host}:{uri.Port}{serviceOptions.HealthCheck}",
                     // 健康检查时间间隔
-                    Interval = TimeSpan.FromSeconds(10),
+                    Interval = TimeSpan.FromSeconds(10), 
                 }
             };
 
