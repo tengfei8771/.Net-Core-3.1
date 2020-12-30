@@ -21,8 +21,8 @@ namespace WebApi.Common
             var attributes = Endpoint.Metadata;
             var NeedNot = attributes.GetMetadata<NeedNotValidateAttribute>();
             var Need = attributes.GetMetadata<NeedValidateAttribute>();
-            int FirstIndex = attributes.IndexOf(NeedNot);
-            int SecondIndex = attributes.IndexOf(Need);
+            int FirstIndex = -1;
+            int SecondIndex = -1;
             if(FirstIndex == -1&& SecondIndex == -1)
             {
                 return flag;
