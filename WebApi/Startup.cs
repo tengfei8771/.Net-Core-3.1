@@ -22,6 +22,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using PublicWebApi.Common.Validator;
+using TimedTask;
 using WebApi.Common.EFCoreCommon;
 
 namespace WebApi
@@ -57,7 +58,7 @@ namespace WebApi
             {
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-            services.AddConsul();
+            //services.AddConsul();
             //启用内存缓存(该步骤需在AddSession()调用前使用)
             services.AddDistributedMemoryCache();//启用session之前必须先添加内存
             //services.AddSession();
@@ -105,6 +106,7 @@ namespace WebApi
                 // 设置时间格式
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
+            services.AddQuartz(typeof(StandardsJob));
             services.AddDbContext<Entity.Models.AppDBContext>(options => options.UseSqlServer("server=localhost;user id=sa;pwd=sa;database=AppDB"));
         }
 
@@ -122,12 +124,13 @@ namespace WebApi
                 c.SwaggerEndpoint($"/swagger/PublicWebApi/swagger.json", "PublicWebApi v1");
 
             });
-            app.UseConsul();
+            //app.UseConsul();
             app.UseSession();
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthentication();
             app.UseMiddleware<JwtMiddleware>();
+            QuartzServices.StartJobs<StandardsJob>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
