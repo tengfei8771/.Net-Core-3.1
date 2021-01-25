@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -8,25 +10,26 @@ namespace UIDP.UTILITY
 {
     public static class ExpressionHelper
     {
-        private static Dictionary<string,object> Cache { get; set; }
+        private static IMemoryCache Cache { get; set; }
         static ExpressionHelper()
         {
-            Cache = new Dictionary<string, object>();
+            Cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
         }
         /// <summary>
         /// 使用表达式树对对象进行赋值，比使用反射性能高50%
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="property"></param>
+        /// <typeparam name="T">要赋值的实体类</typeparam>
+        /// <typeparam name="object">要赋值的实体类</typeparam>
+        /// <param name="property">要赋值的属性</param>
         /// <returns></returns>
         public static Action<T, object> GetSetter<T>(PropertyInfo property)
         {
             Action<T, object> result = null;
             Type type = typeof(T);
             string key = type.AssemblyQualifiedName + "_set_" + property.Name;
-            if (Cache.ContainsKey(key))
+            if (Cache.TryGetValue(key, out object CacheValue))
             {
-                result = Cache[key] as Action<T, object>;
+                result = CacheValue as Action<T, object>;
             }
             else
             {
@@ -34,10 +37,38 @@ namespace UIDP.UTILITY
                 ParameterExpression value = Expression.Parameter(typeof(object), "propertyValue");
                 MethodInfo setter = type.GetMethod("set_" + property.Name);
                 MethodCallExpression call = Expression.Call(parameter, setter, Expression.Convert(value, property.PropertyType));
-                Expression<Action<T,object>> lambda = Expression.Lambda<Action<T, object>>(call, parameter, value);
+                Expression<Action<T, object>> lambda = Expression.Lambda<Action<T, object>>(call, parameter, value);
                 //此方法非常吃性能，必须缓存起来提高速度
                 result = lambda.Compile();
-                Cache.Add(key, result);
+                Cache.Set(key, result);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 使用表达式树赋值，速度不如反射快，建议不用
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="property"></param>
+        /// <returns></returns>
+        public static Func<T, object> GetGetter<T>(PropertyInfo property)
+        {
+            Func<T, object> result = null;
+            Type type = typeof(T);
+            string key = type.AssemblyQualifiedName + "_get_" + property.Name;
+            if (Cache.TryGetValue(key, out object CacheValue))
+            {
+                result = CacheValue as Func<T, object>;
+            }
+            else
+            {
+                var CacheItem = Cache.CreateEntry(key);
+                ParameterExpression parameter = Expression.Parameter(typeof(T), "p");
+                MemberExpression member = Expression.PropertyOrField(parameter, property.Name);
+                UnaryExpression convertExpression = Expression.Convert(member, typeof(object));
+                Expression<Func<T, object>> lambda = Expression.Lambda<Func<T, object>>(convertExpression, parameter);
+                result = lambda.Compile();
+                Cache.Set(key, result);
             }
             return result;
         }

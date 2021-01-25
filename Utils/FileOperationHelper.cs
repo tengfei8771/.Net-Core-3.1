@@ -26,7 +26,7 @@ namespace UIDP.UTILITY
                 JObject obj = new JObject();
                 //获取文件格式名称
                 string FileFormat = Path.GetExtension(file.FileName);
-                string name =file.Name+DateTime.Now.ToString("yyyyMMddHHmmss");
+                string name =Path.GetFileNameWithoutExtension(file.FileName) +DateTime.Now.ToString("yyyyMMddHHmmss");
                 while (File.Exists($"{BasePath}{SavePath}{name}{FileFormat}"))
                 {
                     name = file.Name+DateTime.Now.ToString("yyyyMMddHHmmss");

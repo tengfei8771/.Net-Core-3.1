@@ -127,6 +127,32 @@ namespace UIDP.UTILITY
             }
             return list;
         }
+
+        /// <summary>
+        /// 高性能版构造对象，比使用反射赋值速度快50%
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static List<T> ConvertDatatableToObjectByExpression<T>(DataTable source) where T : class, new()
+        {
+            List<T> list = new List<T>();
+            foreach (DataRow dr in source.Rows)
+            {
+                T item = new T();
+                Type t = item.GetType();
+
+                foreach (var prop in t.GetProperties())
+                {
+                    if (dr.Table.Columns.Contains(prop.Name.ToUpper()) && !IsDBNull(dr[prop.Name.ToUpper()]))
+                    {
+                        ExpressionHelper.GetSetter<T>(prop)(item, dr[prop.Name]);
+                    }
+                }
+                list.Add(item);
+            }
+            return list;
+        }
         /// <summary>
         /// 根据传入的实体和datatable和where条件对实体进行赋值
         /// </summary>
