@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,7 +74,7 @@ namespace UIDP.UTILITY
             if (success)
             {
                 return (T)parameters[1];
-            }
+            } 
             return default(T);
         }
 
@@ -127,7 +128,6 @@ namespace UIDP.UTILITY
             }
             return list;
         }
-
         /// <summary>
         /// 高性能版构造对象，比使用反射赋值速度快50%
         /// </summary>
@@ -141,7 +141,7 @@ namespace UIDP.UTILITY
             {
                 T item = new T();
                 Type t = item.GetType();
-
+                
                 foreach (var prop in t.GetProperties())
                 {
                     if (dr.Table.Columns.Contains(prop.Name.ToUpper()) && !IsDBNull(dr[prop.Name.ToUpper()]))
@@ -301,6 +301,84 @@ namespace UIDP.UTILITY
                 arr.Add(ChildrenObj);
             }
             obj.Add(ChildrenName, arr);
+        }
+
+
+        /// <summary>
+        /// 把根据一个实体List映射到另一个实体List中，并根据条件将其转为树形结构
+        /// </summary>
+        /// <typeparam name="T">数据源</typeparam>
+        /// <typeparam name="T1">映射到的实体</typeparam>
+        /// <param name="Source">TList</param>
+        /// <param name="ParentField">父级标识字段</param>
+        /// <param name="ChildrenField">子级标识字段</param>
+        /// <returns></returns>
+        public static List<T1> ConvertObjectToTreeList<T,T1>(List<T> Source, Expression<Func<T, object>> ParentField, Expression<Func<T, object>> ChildrenField) 
+            where T : class, new() 
+            where T1:class,new()
+        {
+            BinaryExpression ParentExpLeft = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, "");
+            BinaryExpression ParentExpRight = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, null);
+            ParameterExpression parameter = ExpressionHelper.GetCacheByKey(typeof(T).AssemblyQualifiedName) as ParameterExpression;
+            var WhereCondition = Expression.Lambda<Func<T, bool>>(Expression.Or(ParentExpLeft, ParentExpRight), parameter);
+            List<T> ParentList = Source.Where(WhereCondition.Compile()).ToList();
+            List<T1> list = new List<T1>();
+            foreach (T SourceItem in ParentList)
+            {
+                T1 Item = new T1();
+                Type ItemType = Item.GetType();
+                Type SourceItemType = SourceItem.GetType();
+                foreach (var prop in ItemType.GetProperties())
+                {
+                    var SourceProp = SourceItemType.GetProperty(prop.Name);
+                    if (SourceProp != null)
+                    {
+                        //给T1赋值
+                        ExpressionHelper.GetSetter<T1>(prop)(Item, SourceProp.GetValue(SourceItem));
+                    }
+                    if (prop.PropertyType == typeof(List<T1>))
+                    {
+                        CreateObjectChildrenNode(Source, Item, ParentField, ChildrenField, prop.Name);
+                    }
+                }
+                list.Add(Item);
+            }
+            return list;
+        }
+
+        private static void CreateObjectChildrenNode<T, T1>(List<T> Source, T1 ParentItem, Expression<Func<T, object>> ParentField, Expression<Func<T, object>> ChildrenField, string ChildrenName)
+            where T : class, new()
+            where T1 : class, new()
+        {
+            string ParentFieldName = ExpressionHelper.GetPropertyName(ParentField);
+            Type ParentProp = typeof(T1);
+            BinaryExpression ChildrenOrigin = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, ParentProp.GetProperty(ParentFieldName).GetValue(ParentItem));
+            ParameterExpression parameter = ExpressionHelper.GetCacheByKey(typeof(T).AssemblyQualifiedName) as ParameterExpression;
+            var ChildrenExp = Expression.Lambda<Func<T, bool>>(ChildrenOrigin, parameter);
+            List<T> SoureChildrenList = Source.Where(ChildrenExp.Compile()).ToList();
+            List<T1> ChildrenList = new List<T1>();
+            foreach (T SourceChildrenItem in SoureChildrenList)
+            {
+                T1 Item = new T1();
+                Type ItemType = Item.GetType();
+                Type SourceItemType = SourceChildrenItem.GetType();
+                foreach (var prop in ItemType.GetProperties())
+                {
+                    var SourceProp = SourceItemType.GetProperty(prop.Name);
+                    if (SourceProp != null)
+                    {
+                        //给T1赋值
+                        ExpressionHelper.GetSetter<T1>(prop)(Item, SourceProp.GetValue(SourceChildrenItem));
+                    }
+                    if (prop.PropertyType == typeof(List<T1>))
+                    {
+                        CreateObjectChildrenNode(Source, Item, ParentField, ChildrenField, prop.Name);
+                    }             
+                }
+                ChildrenList.Add(Item);
+            }
+            var ChildrenProp = ParentProp.GetProperty(ChildrenName);
+            ExpressionHelper.GetSetter<T1>(ChildrenProp)(ParentItem, ChildrenList);
         }
 
         private static bool IsDBNull(object t)

@@ -15,6 +15,18 @@ namespace UIDP.UTILITY
         {
             Cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
         }
+
+        public static object GetCacheByKey(string key)
+        {
+            if(Cache.TryGetValue(key, out object CacheValue))
+            {
+                return CacheValue;
+            }
+            else
+            {
+                return null;
+            }
+        }
         /// <summary>
         /// 使用表达式树对对象进行赋值，比使用反射性能高50%
         /// </summary>
@@ -27,7 +39,7 @@ namespace UIDP.UTILITY
             Action<T, object> result = null;
             Type type = typeof(T);
             string key = type.AssemblyQualifiedName + "_set_" + property.Name;
-            if (Cache.TryGetValue(key, out object CacheValue))
+            if (Cache.TryGetValue(key,out object CacheValue))
             {
                 result = CacheValue as Action<T, object>;
             }
@@ -37,7 +49,7 @@ namespace UIDP.UTILITY
                 ParameterExpression value = Expression.Parameter(typeof(object), "propertyValue");
                 MethodInfo setter = type.GetMethod("set_" + property.Name);
                 MethodCallExpression call = Expression.Call(parameter, setter, Expression.Convert(value, property.PropertyType));
-                Expression<Action<T, object>> lambda = Expression.Lambda<Action<T, object>>(call, parameter, value);
+                Expression<Action<T,object>> lambda = Expression.Lambda<Action<T, object>>(call, parameter, value);
                 //此方法非常吃性能，必须缓存起来提高速度
                 result = lambda.Compile();
                 Cache.Set(key, result);
@@ -51,7 +63,7 @@ namespace UIDP.UTILITY
         /// <typeparam name="T"></typeparam>
         /// <param name="property"></param>
         /// <returns></returns>
-        public static Func<T, object> GetGetter<T>(PropertyInfo property)
+        public static Func<T,object> GetGetter<T>(PropertyInfo property)
         {
             Func<T, object> result = null;
             Type type = typeof(T);
@@ -62,7 +74,6 @@ namespace UIDP.UTILITY
             }
             else
             {
-                var CacheItem = Cache.CreateEntry(key);
                 ParameterExpression parameter = Expression.Parameter(typeof(T), "p");
                 MemberExpression member = Expression.PropertyOrField(parameter, property.Name);
                 UnaryExpression convertExpression = Expression.Convert(member, typeof(object));
@@ -71,6 +82,59 @@ namespace UIDP.UTILITY
                 Cache.Set(key, result);
             }
             return result;
+        }
+
+        /// <summary>
+        /// 根据selector条件和value生成p=>p.propertyName == propertyValue
+        /// </summary>
+        /// <typeparam name="T">实体类</typeparam>
+        /// <typeparam name="TResult">委托返回类型</typeparam>
+        /// <param name="Selector">p=>p.propertyName</param>
+        /// <param name="value">等式右值</param>
+        /// <returns></returns>
+        public static BinaryExpression CreateWhereConditionBySelector<T>(Expression<Func<T,object>> Selector,object value)
+        {
+            string key = typeof(T).AssemblyQualifiedName;
+            ParameterExpression parameter;
+            //缓存parameter的原因是所有被拼接lambda表达式的parameter不能被销毁，且是同一个
+            if (Cache.TryGetValue(key, out object CacheValue))
+            {
+                parameter = CacheValue as ParameterExpression;
+            }
+            else
+            {
+                parameter = Expression.Parameter(typeof(T), "p");//创建参数p
+                Cache.Set(key, parameter);
+            }
+            string FieldName = GetPropertyName(Selector); 
+            MemberExpression member = Expression.PropertyOrField(parameter, FieldName);
+            ConstantExpression constant = Expression.Constant(value);//创建常数
+            return Expression.Equal(member, constant);
+        }
+
+        /// <summary>
+        /// 根据表达式获取属性的名称
+        /// </summary>
+        /// <typeparam name="T">实体类</typeparam>
+        /// <param name="exp">表达式</param>
+        /// <returns></returns>
+        public static string GetPropertyName<T>(Expression<Func<T, object>> exp)
+        {
+            var Name = "";
+            var body = exp.Body;
+            if (body is UnaryExpression)
+            {
+                Name = ((MemberExpression)((UnaryExpression)body).Operand).Member.Name;
+            }
+            else if (body is MemberExpression)
+            {
+                Name = ((MemberExpression)body).Member.Name;
+            }
+            else if (body is ParameterExpression)
+            {
+                Name = ((ParameterExpression)body).Type.Name;
+            }
+            return Name;
         }
 
         /// <summary>
@@ -113,7 +177,7 @@ namespace UIDP.UTILITY
         /// <param name="propertyName">属性名</param>
         /// <param name="propertyValue">等式右值</param>
         /// <returns></returns>
-        public static Expression<Func<T, bool>> CreateEqual<T>(string propertyName, string propertyValue)
+        public static Expression<Func<T, bool>> CreateEqual<T>(string propertyName, object propertyValue)
         {
             ParameterExpression parameter = Expression.Parameter(typeof(T), "p");//创建参数p
             MemberExpression member = Expression.PropertyOrField(parameter, propertyName);
