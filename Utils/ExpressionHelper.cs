@@ -92,20 +92,9 @@ namespace UIDP.UTILITY
         /// <param name="Selector">p=>p.propertyName</param>
         /// <param name="value">等式右值</param>
         /// <returns></returns>
-        public static BinaryExpression CreateWhereConditionBySelector<T>(Expression<Func<T,object>> Selector,object value)
+        public static BinaryExpression CreateWhereConditionBySelector<T>(Expression<Func<T,object>> Selector,object value,ParameterExpression parameter)
         {
             string key = typeof(T).AssemblyQualifiedName;
-            ParameterExpression parameter;
-            //缓存parameter的原因是所有被拼接lambda表达式的parameter不能被销毁，且是同一个
-            if (Cache.TryGetValue(key, out object CacheValue))
-            {
-                parameter = CacheValue as ParameterExpression;
-            }
-            else
-            {
-                parameter = Expression.Parameter(typeof(T), "p");//创建参数p
-                Cache.Set(key, parameter);
-            }
             string FieldName = GetPropertyName(Selector); 
             MemberExpression member = Expression.PropertyOrField(parameter, FieldName);
             ConstantExpression constant = Expression.Constant(value);//创建常数

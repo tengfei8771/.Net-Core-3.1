@@ -317,9 +317,9 @@ namespace UIDP.UTILITY
             where T : class, new() 
             where T1:class,new()
         {
-            BinaryExpression ParentExpLeft = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, "");
-            BinaryExpression ParentExpRight = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, null);
-            ParameterExpression parameter = ExpressionHelper.GetCacheByKey(typeof(T).AssemblyQualifiedName) as ParameterExpression;
+            ParameterExpression parameter = Expression.Parameter(typeof(T), "p");
+            BinaryExpression ParentExpLeft = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, "", parameter);
+            BinaryExpression ParentExpRight = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, null, parameter);
             var WhereCondition = Expression.Lambda<Func<T, bool>>(Expression.Or(ParentExpLeft, ParentExpRight), parameter);
             List<T> ParentList = Source.Where(WhereCondition.Compile()).ToList();
             List<T1> list = new List<T1>();
@@ -352,8 +352,8 @@ namespace UIDP.UTILITY
         {
             string ParentFieldName = ExpressionHelper.GetPropertyName(ParentField);
             Type ParentProp = typeof(T1);
-            BinaryExpression ChildrenOrigin = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, ParentProp.GetProperty(ParentFieldName).GetValue(ParentItem));
-            ParameterExpression parameter = ExpressionHelper.GetCacheByKey(typeof(T).AssemblyQualifiedName) as ParameterExpression;
+            ParameterExpression parameter = Expression.Parameter(typeof(T), "p");
+            BinaryExpression ChildrenOrigin = ExpressionHelper.CreateWhereConditionBySelector(ChildrenField, ParentProp.GetProperty(ParentFieldName).GetValue(ParentItem),parameter);
             var ChildrenExp = Expression.Lambda<Func<T, bool>>(ChildrenOrigin, parameter);
             List<T> SoureChildrenList = Source.Where(ChildrenExp.Compile()).ToList();
             List<T1> ChildrenList = new List<T1>();
