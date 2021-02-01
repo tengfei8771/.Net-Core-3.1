@@ -119,9 +119,14 @@ namespace UIDP.UTILITY
                 Type t = item.GetType();
                 foreach (var prop in t.GetProperties())
                 {
-                    if (dr.Table.Columns.Contains(prop.Name.ToUpper()) && !IsDBNull(dr[prop.Name.ToUpper()]))
+                    string MapperName = GetMapperName(prop);
+                    if (string.IsNullOrEmpty(MapperName))
                     {
-                        prop.SetValue(item, Convert.ChangeType(dr[prop.Name.ToUpper()], prop.PropertyType));
+                        MapperName = prop.Name;
+                    }
+                    if (dr.Table.Columns.Contains(MapperName) && !IsDBNull(dr[MapperName]))
+                    {
+                        prop.SetValue(item, Convert.ChangeType(dr[MapperName], prop.PropertyType));
                     }
                 }
                 list.Add(item);
@@ -380,6 +385,23 @@ namespace UIDP.UTILITY
             var ChildrenProp = ParentProp.GetProperty(ChildrenName);
             ExpressionHelper.GetSetter<T1>(ChildrenProp)(ParentItem, ChildrenList);
         }
+        public static string GetMapperName(PropertyInfo prop)
+        {
+            var Attribute = prop.GetCustomAttribute<MapperAttribute>();
+            if (Attribute == null)
+            {
+                return "";
+            }
+            if (Attribute.IgnoreColumn)
+            {
+                return "";
+            }
+            else
+            {
+                return Attribute.MapperName;
+            }
+        }
+
 
         private static bool IsDBNull(object t)
         {
