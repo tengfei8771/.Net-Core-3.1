@@ -77,6 +77,38 @@ namespace Utils
             } 
             return default(T);
         }
+        /// <summary>
+        /// 根据标注的Mapper标注名和属性名，将listA转化为listB
+        /// </summary>
+        /// <typeparam name="A">数据源类型A</typeparam>
+        /// <typeparam name="B">被转化的类型B</typeparam>
+        /// <param name="Source">数据源listA</param>
+        /// <returns>结果集listB</returns>
+        public static List<B> ConvertAToB <A,B>(List<A> Source) where A:class,new() where B : class, new()
+        {
+            List<B> list = new List<B>();
+            Type typeB = typeof(B);
+            Type typeA = typeof(A);
+            foreach (A Sourceitem in Source)
+            {
+                B item = new B();
+                foreach(var prop in typeB.GetProperties())
+                {
+                    string MapperName = GetMapperName(prop);
+                    if (string.IsNullOrEmpty(MapperName))
+                    {
+                        MapperName = prop.Name;
+                    }
+                    var propA = typeA.GetProperty(MapperName);
+                    if (propA != null)
+                    {
+                        ExpressionHelper.GetSetter<B>(prop)(item,propA.GetValue(Sourceitem));
+                    }                   
+                }
+                list.Add(item);
+            }
+            return list;
+        }
 
         /// <summary>
         /// 异步方法,根据异步获取的datatable生成实体和where条件对实体进行赋值
@@ -88,19 +120,7 @@ namespace Utils
         {
             List<T> list = new List<T>();
             DataTable dt = await source;
-            foreach (DataRow dr in dt.Rows)
-            {
-                T item = new T();
-                Type t = item.GetType();
-                foreach (var prop in t.GetProperties())
-                {
-                    if (dr.Table.Columns.Contains(prop.Name.ToUpper()) && !IsDBNull(dr[prop.Name.ToUpper()]))
-                    {
-                        prop.SetValue(item, Convert.ChangeType(dr[prop.Name.ToUpper()], prop.PropertyType));
-                    }
-                }
-                list.Add(item);
-            }
+            list = ConvertDatatableToObject<T>(dt);
             return list;
         }
 
@@ -113,10 +133,10 @@ namespace Utils
         public static List<T> ConvertDatatableToObject<T>(DataTable source) where T : class, new()
         {
             List<T> list = new List<T>();
+            Type t = typeof(T);
             foreach (DataRow dr in source.Rows)
             {
                 T item = new T();
-                Type t = item.GetType();
                 foreach (var prop in t.GetProperties())
                 {
                     string MapperName = GetMapperName(prop);
@@ -126,7 +146,10 @@ namespace Utils
                     }
                     if (dr.Table.Columns.Contains(MapperName) && !IsDBNull(dr[MapperName]))
                     {
-                        prop.SetValue(item, Convert.ChangeType(dr[MapperName], prop.PropertyType));
+                        //反射赋值
+                        //prop.SetValue(item, Convert.ChangeType(dr[MapperName], prop.PropertyType));
+                        //表达树赋值
+                        ExpressionHelper.GetSetter<T>(prop)(item, dr[prop.Name]);
                     }
                 }
                 list.Add(item);
@@ -145,11 +168,15 @@ namespace Utils
             foreach (DataRow dr in source.Rows)
             {
                 T item = new T();
-                Type t = item.GetType();
-                
+                Type t = item.GetType();      
                 foreach (var prop in t.GetProperties())
                 {
-                    if (dr.Table.Columns.Contains(prop.Name.ToUpper()) && !IsDBNull(dr[prop.Name.ToUpper()]))
+                    string MapperName = GetMapperName(prop);
+                    if (string.IsNullOrEmpty(MapperName))
+                    {
+                        MapperName = prop.Name;
+                    }
+                    if (dr.Table.Columns.Contains(MapperName) && !IsDBNull(dr[MapperName]))
                     {
                         ExpressionHelper.GetSetter<T>(prop)(item, dr[prop.Name]);
                     }
@@ -168,19 +195,8 @@ namespace Utils
         public static List<T> ConvertDatatableToObject<T>(DataTable source,string WhereCondition) where T : class, new()
         {
             List<T> list = new List<T>();
-            foreach (DataRow dr in source.Select(WhereCondition))
-            {
-                T item = new T();
-                Type t = item.GetType();
-                foreach (var prop in t.GetProperties())
-                {
-                    if (dr.Table.Columns.Contains(prop.Name.ToUpper()) && !IsDBNull(dr[prop.Name.ToUpper()]))
-                    {
-                        prop.SetValue(item, Convert.ChangeType(dr[prop.Name.ToUpper()], prop.PropertyType));
-                    }
-                }
-                list.Add(item);
-            }
+            DataTable dt = GetNewDataTable(source,WhereCondition);
+            list = ConvertDatatableToObject<T>(dt);
             return list;
         }
 
@@ -195,19 +211,7 @@ namespace Utils
         {
             List<T> list = new List<T>();
             DataTable dt = await source;
-            foreach (DataRow dr in dt.Select(WhereCondition))
-            {
-                T item = new T();
-                Type t = item.GetType();
-                foreach (var prop in t.GetProperties())
-                {
-                    if (dr.Table.Columns.Contains(prop.Name.ToUpper()) && !IsDBNull(dr[prop.Name.ToUpper()]))
-                    {
-                        prop.SetValue(item, Convert.ChangeType(dr[prop.Name.ToUpper()], prop.PropertyType));
-                    }
-                }
-                list.Add(item);
-            }
+            list = ConvertDatatableToObject<T>(GetNewDataTable(dt,WhereCondition));
             return list;
         }
         /// <summary>
@@ -385,7 +389,7 @@ namespace Utils
             var ChildrenProp = ParentProp.GetProperty(ChildrenName);
             ExpressionHelper.GetSetter<T1>(ChildrenProp)(ParentItem, ChildrenList);
         }
-        public static string GetMapperName(PropertyInfo prop)
+        private static string GetMapperName(PropertyInfo prop)
         {
             var Attribute = prop.GetCustomAttribute<MapperAttribute>();
             if (Attribute == null)
@@ -401,7 +405,23 @@ namespace Utils
                 return Attribute.MapperName;
             }
         }
-
+        /// <summary>
+        /// 将dt select的结果从dr[] 变成dt
+        /// </summary>
+        /// <param name="dt">数据源</param>
+        /// <param name="condition">查询条件</param>
+        /// <returns></returns>
+        private static DataTable GetNewDataTable(DataTable dt, string condition)
+        {
+            DataTable newdt = new DataTable();
+            newdt = dt.Clone();
+            DataRow[] dr = dt.Select(condition);
+            for (int i = 0; i < dr.Length; i++)
+            {
+                newdt.ImportRow((DataRow)dr[i]);
+            }
+            return newdt;//返回的查询结果
+        }
 
         private static bool IsDBNull(object t)
         {
