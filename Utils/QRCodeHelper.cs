@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace UIDP.UTILITY
+namespace Utils
 {
     /// <summary>
     /// 二维码生成帮助类

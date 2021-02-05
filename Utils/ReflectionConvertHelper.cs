@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UIDP.UTILITY
+namespace Utils
 {
     /// <summary>
     /// 反射帮助类，通过反射实现的一些通用方法全部集中在此。

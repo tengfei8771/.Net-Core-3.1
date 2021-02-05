@@ -11,7 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PublicWebApi.Common
+namespace Utils
 {
     public class JwtHelper
     {

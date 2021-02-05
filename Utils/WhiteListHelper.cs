@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PublicWebApi.Common
+namespace Utils
 {
     public class WhiteListHelper
     {

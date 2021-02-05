@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace UIDP.UTILITY
+namespace Utils
 {
     public static class ExpressionHelper
     {

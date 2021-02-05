@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UIDP.UTILITY
+namespace Utils
 {
     public class ZipHelper
     {

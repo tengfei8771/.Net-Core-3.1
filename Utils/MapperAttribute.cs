@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UIDP.UTILITY
+namespace Utils
 {
     public class MapperAttribute: Attribute
     {
