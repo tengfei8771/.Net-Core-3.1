@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace UIDP.BIZModule.Models
+namespace Services
 {
     public class TestRelectionAndExpressionModel
     {

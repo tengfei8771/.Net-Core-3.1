@@ -28,7 +28,7 @@ namespace TimedTask
             var trigger1 = TriggerBuilder.Create()
               .WithIdentity("job.trigger")
               .StartNow()
-              .WithSchedule(CronScheduleBuilder.CronSchedule("0/20 * * * * ?"))
+              .WithSchedule(CronScheduleBuilder.CronSchedule("0/20 * 18 * * ?"))
               .ForJob(job)
               .Build();
             scheduler.AddJob(job, true);
@@ -53,7 +53,7 @@ namespace TimedTask
             var trigger1 = TriggerBuilder.Create()
                .WithIdentity("job.trigger")
                .StartNow()
-               .WithSchedule(CronScheduleBuilder.CronSchedule("0/20 * * * * ?"))
+               .WithSchedule(CronScheduleBuilder.CronSchedule("0/20 * 18 * * ?"))
                .ForJob(job)
                .Build();
 

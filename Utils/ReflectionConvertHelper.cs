@@ -47,7 +47,7 @@ namespace Utils
             }
             catch(Exception e)
             {
-                throw e;
+                throw;
             }
         }
         public static T ConvertType<T>(object val)
@@ -102,7 +102,7 @@ namespace Utils
                     var propA = typeA.GetProperty(MapperName);
                     if (propA != null)
                     {
-                        ExpressionHelper.GetSetter<B>(prop)(item,propA.GetValue(Sourceitem));
+                        prop.SetValue(item,propA.GetValue(Sourceitem));
                     }                   
                 }
                 list.Add(item);
@@ -147,38 +147,9 @@ namespace Utils
                     if (dr.Table.Columns.Contains(MapperName) && !IsDBNull(dr[MapperName]))
                     {
                         //反射赋值
-                        //prop.SetValue(item, Convert.ChangeType(dr[MapperName], prop.PropertyType));
+                        prop.SetValue(item, Convert.ChangeType(dr[MapperName], prop.PropertyType));
                         //表达树赋值
-                        ExpressionHelper.GetSetter<T>(prop)(item, dr[prop.Name]);
-                    }
-                }
-                list.Add(item);
-            }
-            return list;
-        }
-        /// <summary>
-        /// 高性能版构造对象，比使用反射赋值速度快50%
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        public static List<T> ConvertDatatableToObjectByExpression<T>(DataTable source) where T : class, new()
-        {
-            List<T> list = new List<T>();
-            foreach (DataRow dr in source.Rows)
-            {
-                T item = new T();
-                Type t = item.GetType();      
-                foreach (var prop in t.GetProperties())
-                {
-                    string MapperName = GetMapperName(prop);
-                    if (string.IsNullOrEmpty(MapperName))
-                    {
-                        MapperName = prop.Name;
-                    }
-                    if (dr.Table.Columns.Contains(MapperName) && !IsDBNull(dr[MapperName]))
-                    {
-                        ExpressionHelper.GetSetter<T>(prop)(item, dr[prop.Name]);
+                        //ExpressionHelper.GetSetter<T>(prop)(item, dr[MapperName]);
                     }
                 }
                 list.Add(item);
@@ -194,10 +165,8 @@ namespace Utils
         /// <returns></returns>
         public static List<T> ConvertDatatableToObject<T>(DataTable source,string WhereCondition) where T : class, new()
         {
-            List<T> list = new List<T>();
             DataTable dt = GetNewDataTable(source,WhereCondition);
-            list = ConvertDatatableToObject<T>(dt);
-            return list;
+            return ConvertDatatableToObject<T>(dt);
         }
 
         /// <summary>
@@ -209,10 +178,8 @@ namespace Utils
         /// <returns></returns>
         public static async Task<List<T>> ConvertDatatableToObject<T>(Task<DataTable> source, string WhereCondition) where T : class, new()
         {
-            List<T> list = new List<T>();
             DataTable dt = await source;
-            list = ConvertDatatableToObject<T>(GetNewDataTable(dt,WhereCondition));
-            return list;
+            return ConvertDatatableToObject<T>(GetNewDataTable(dt, WhereCondition));
         }
         /// <summary>
         /// 将数据源转换为一个树形结构的实体
@@ -225,10 +192,10 @@ namespace Utils
         public static List<T> ConvertDatatableToTreeList<T>(DataTable Source,string MainName,string CombineRelationName) where T:class,new()
         {
             List<T> list = new List<T>();
+            Type t = typeof(T);
             foreach (DataRow dr in Source.Select($"{CombineRelationName} IS NULL OR {CombineRelationName}=''"))
             {
                 T item = new T();
-                Type t = item.GetType();
                 foreach (var prop in t.GetProperties())
                 {
                     if (dr.Table.Columns.Contains(prop.Name.ToUpper()) && !IsDBNull(dr[prop.Name.ToUpper()]))
@@ -332,18 +299,19 @@ namespace Utils
             var WhereCondition = Expression.Lambda<Func<T, bool>>(Expression.Or(ParentExpLeft, ParentExpRight), parameter);
             List<T> ParentList = Source.Where(WhereCondition.Compile()).ToList();
             List<T1> list = new List<T1>();
+            Type ItemType = typeof(T1);
+            Type SourceItemType = typeof(T);
             foreach (T SourceItem in ParentList)
             {
                 T1 Item = new T1();
-                Type ItemType = Item.GetType();
-                Type SourceItemType = SourceItem.GetType();
+                
                 foreach (var prop in ItemType.GetProperties())
                 {
                     var SourceProp = SourceItemType.GetProperty(prop.Name);
                     if (SourceProp != null)
                     {
                         //给T1赋值
-                        ExpressionHelper.GetSetter<T1>(prop)(Item, SourceProp.GetValue(SourceItem));
+                        prop.SetValue(Item, SourceProp.GetValue(SourceItem));
                     }
                     if (prop.PropertyType == typeof(List<T1>))
                     {
@@ -366,18 +334,18 @@ namespace Utils
             var ChildrenExp = Expression.Lambda<Func<T, bool>>(ChildrenOrigin, parameter);
             List<T> SoureChildrenList = Source.Where(ChildrenExp.Compile()).ToList();
             List<T1> ChildrenList = new List<T1>();
+            Type ItemType = typeof(T1);
+            Type SourceItemType = typeof(T);
             foreach (T SourceChildrenItem in SoureChildrenList)
             {
                 T1 Item = new T1();
-                Type ItemType = Item.GetType();
-                Type SourceItemType = SourceChildrenItem.GetType();
                 foreach (var prop in ItemType.GetProperties())
                 {
                     var SourceProp = SourceItemType.GetProperty(prop.Name);
                     if (SourceProp != null)
                     {
                         //给T1赋值
-                        ExpressionHelper.GetSetter<T1>(prop)(Item, SourceProp.GetValue(SourceChildrenItem));
+                        prop.SetValue(Item, SourceProp.GetValue(SourceChildrenItem));
                     }
                     if (prop.PropertyType == typeof(List<T1>))
                     {
@@ -387,8 +355,13 @@ namespace Utils
                 ChildrenList.Add(Item);
             }
             var ChildrenProp = ParentProp.GetProperty(ChildrenName);
-            ExpressionHelper.GetSetter<T1>(ChildrenProp)(ParentItem, ChildrenList);
+            ChildrenProp.SetValue(ParentItem, ChildrenList);
         }
+        /// <summary>
+        /// 获取标注的属性名
+        /// </summary>
+        /// <param name="prop">属性</param>
+        /// <returns>属性名</returns>
         private static string GetMapperName(PropertyInfo prop)
         {
             var Attribute = prop.GetCustomAttribute<MapperAttribute>();

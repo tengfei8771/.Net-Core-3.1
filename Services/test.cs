@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using System.Text;
-using UIDP.BIZModule.Models;
-using UIDP.UTILITY;
 using Utils;
 
-namespace UIDP.BIZModule
+namespace Services
 {
     public class test
     {
@@ -27,7 +25,7 @@ namespace UIDP.BIZModule
             dt.Columns.Add("test2", typeof(decimal));
             dt.Columns.Add("test3", typeof(DateTime));
             dt.Columns.Add("test4", typeof(long));
-            for(int i = 0; i <= 10000; i++)
+            for(int i = 0; i <= 100000; i++)
             {
                 DataRow dr = dt.NewRow();
                 dr["test1"] = 1;
@@ -36,7 +34,7 @@ namespace UIDP.BIZModule
                 dr["test4"] = 3;
                 for (int j = 5; j <= 10; j++)
                 {
-                    dr[$"test{j}"] = $"test{i},{j}";
+                    dr[$"test{j}"] = $"model{i},{j}";
                 }
                 dt.Rows.Add(dr);
             }
@@ -50,7 +48,7 @@ namespace UIDP.BIZModule
 
         public List<TestRelectionAndExpressionModel> CreateModelByExpression()
         {
-            return ReflectionConvertHelper.ConvertDatatableToObjectByExpression<TestRelectionAndExpressionModel>(Source);
+            return ExpressionHelper.ConvertDataTableToObject<TestRelectionAndExpressionModel>(Source);
         }
 
         public object GetExpressionValue<T>(T item, PropertyInfo prop)

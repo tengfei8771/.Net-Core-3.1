@@ -20,7 +20,7 @@ namespace WebApi.Controllers
             this.userService = userService;
         }
         [HttpGet]
-        public string Test()
+        public object Test()
         {
             var list = userService.GetUserList();
             return testService.Test();

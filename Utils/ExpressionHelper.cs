@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -10,25 +11,15 @@ namespace Utils
 {
     public static class ExpressionHelper
     {
-        private static IMemoryCache Cache { get; set; }
+        //private static IMemoryCache Cache { get; set; }
+        private static Dictionary<string,object> Cache { get; set; }
         static ExpressionHelper()
         {
-            Cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
-        }
-
-        public static object GetCacheByKey(string key)
-        {
-            if(Cache.TryGetValue(key, out object CacheValue))
-            {
-                return CacheValue;
-            }
-            else
-            {
-                return null;
-            }
+            //Cache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+            Cache = new Dictionary<string, object>();
         }
         /// <summary>
-        /// 使用表达式树对对象进行赋值，比使用反射性能高50%
+        /// 使用表达式树对对象进行赋值，比反射性能强
         /// </summary>
         /// <typeparam name="T">要赋值的实体类</typeparam>
         /// <typeparam name="object">要赋值的实体类</typeparam>
@@ -52,7 +43,7 @@ namespace Utils
                 Expression<Action<T,object>> lambda = Expression.Lambda<Action<T, object>>(call, parameter, value);
                 //此方法非常吃性能，必须缓存起来提高速度
                 result = lambda.Compile();
-                Cache.Set(key, result);
+                Cache.Add(key, result);
             }
             return result;
         }
@@ -79,10 +70,41 @@ namespace Utils
                 UnaryExpression convertExpression = Expression.Convert(member, typeof(object));
                 Expression<Func<T, object>> lambda = Expression.Lambda<Func<T, object>>(convertExpression, parameter);
                 result = lambda.Compile();
-                Cache.Set(key, result);
+                Cache.Add(key, result);
             }
             return result;
         }
+
+        /// <summary>
+        /// 高性能版构造对象，速度性能显著提升
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static List<T> ConvertDataTableToObject<T>(DataTable source) where T : class, new()
+        {
+            List<T> list = new List<T>();
+            Type t = typeof(T);
+            foreach (DataRow dr in source.Rows)
+            {
+                T item = new T();
+                foreach (var prop in t.GetProperties())
+                {
+                    string MapperName = GetMapperName(prop);
+                    if (string.IsNullOrEmpty(MapperName))
+                    {
+                        MapperName = prop.Name;
+                    }
+                    if (dr.Table.Columns.Contains(MapperName) && !IsDBNull(dr[MapperName]))
+                    {
+                        GetSetter<T>(prop)(item, dr[MapperName]);
+                    }
+                }
+                list.Add(item);
+            }
+            return list;
+        }
+
 
         /// <summary>
         /// 根据selector条件和value生成p=>p.propertyName == propertyValue
@@ -334,6 +356,33 @@ namespace Utils
             MethodInfo method = typeof(string).GetMethod("Contains", new[] { typeof(string) });
             ConstantExpression constant = Expression.Constant(propertyValue, typeof(string));
             return Expression.Lambda<Func<T, bool>>(Expression.Not(Expression.Call(member, method, constant)), parameter);
+        }
+
+        /// <summary>
+        /// 获取标注的属性名
+        /// </summary>
+        /// <param name="prop">属性</param>
+        /// <returns>属性名</returns>
+        private static string GetMapperName(PropertyInfo prop)
+        {
+            var Attribute = prop.GetCustomAttribute<MapperAttribute>();
+            if (Attribute == null)
+            {
+                return "";
+            }
+            if (Attribute.IgnoreColumn)
+            {
+                return "";
+            }
+            else
+            {
+                return Attribute.MapperName;
+            }
+        }
+
+        private static bool IsDBNull(object t)
+        {
+            return t is DBNull;
         }
     }
 }

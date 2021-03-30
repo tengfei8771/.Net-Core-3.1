@@ -1,5 +1,7 @@
 ﻿using Entity.Models;
 using IRepository;
+using System.Data;
+using System.Linq;
 
 namespace Repository
 {
@@ -10,5 +12,9 @@ namespace Repository
         {
             this._appDBContext = _appDBContext;
         }
+        //public DataTable GetUserInfo()
+        //{
+        //    var list= _appDBContext.Set<User>().Join()
+        //}
     }
 }
