@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "..\Models\Models.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsulBuilder", "..\ConsulBuilder\ConsulBuilder.csproj", "{6F063BF6-AB83-4128-A4F3-3D76331A3432}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dispatch", "..\Dispatch\Dispatch.csproj", "{C8D4116E-C799-4DBB-AE03-9A45BC3B663A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dispatch", "..\Dispatch\Dispatch.csproj", "{C8D4116E-C799-4DBB-AE03-9A45BC3B663A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlSugarAndEntity", "..\SqlSugarAndEntity\SqlSugarAndEntity.csproj", "{442D107C-358D-45DF-98F4-3D0C2BC32498}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{C8D4116E-C799-4DBB-AE03-9A45BC3B663A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8D4116E-C799-4DBB-AE03-9A45BC3B663A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8D4116E-C799-4DBB-AE03-9A45BC3B663A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{442D107C-358D-45DF-98F4-3D0C2BC32498}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{442D107C-358D-45DF-98F4-3D0C2BC32498}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{442D107C-358D-45DF-98F4-3D0C2BC32498}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{442D107C-358D-45DF-98F4-3D0C2BC32498}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
