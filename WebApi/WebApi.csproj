@@ -30,6 +30,11 @@
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="5.21.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.1.2" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.1.2" />
+	<PackageReference Include="System.Threading" Version="4.3.0" />
+	<PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+	<PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
+	<PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
+	<PackageReference Include="System.Net.Primitives" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +47,7 @@
     <ProjectReference Include="..\Redis\Redis.csproj" />
     <ProjectReference Include="..\Repository\Repository.csproj" />
     <ProjectReference Include="..\Services\Services.csproj" />
+    <ProjectReference Include="..\SqlSugarAndEntity\SqlSugarAndEntity.csproj" />
     <ProjectReference Include="..\Utils\Utils.csproj" />
   </ItemGroup>
 

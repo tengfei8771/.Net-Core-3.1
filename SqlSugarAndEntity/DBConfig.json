@@ -1,0 +1,11 @@
+{
+  "DBType": "ORACLE",
+  "MasterConnetion": "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.0.102)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL)));User Id=EQUIPMENT1;Password=1234567",
+  "SlaveCount": 0,
+  "SlaveConnetions": [
+    {
+      "HitRate": 10,
+      "ConnectionString": "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.0.102)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL)));User Id=EQUIPMENT1;Password=1234567"
+    }
+  ]
+}
