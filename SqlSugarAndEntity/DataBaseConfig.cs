@@ -6,14 +6,14 @@ using System.Collections.Generic;
 
 namespace SqlSugarAndEntity
 {
-    public  class DataBaseConfig
+    public static class DataBaseConfig
     {
-        public ConnectionConfig _config = null;
-        public DataBaseConfig()
+        public static ConnectionConfig _config = null;
+        static DataBaseConfig()
         {
             GetConfig();
         }
-        private void GetConfig()
+        private static void GetConfig()
         {
             var _builder = new ConfigurationBuilder();
             var config = _builder.Add(new JsonConfigurationSource { Path = "DBConfig.json", Optional = false, ReloadOnChange = true }).Build();

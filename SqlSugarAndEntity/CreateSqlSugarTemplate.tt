@@ -1,0 +1,40 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Reflection.RuntimeAssembly" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="SqlSugar"#>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="$(projectDir)lib\SqlSugar.dll" #>
+<#@ assembly name="$(projectDir)lib\netstandard.dll" #>
+<#@ assembly name="$(projectDir)lib\Oracle.ManagedDataAccess.dll" #>
+<#@ assembly name="$(projectDir)lib\MySql.Data.dll" #>
+
+
+<#   
+            //当前项目目录
+            string projectDir = Host.ResolveAssemblyReference("$(ProjectDir)");
+
+            //解决方案目录
+            string solutionDir = Host.ResolveAssemblyReference("$(SolutionDir)");
+
+            //项目名称
+            string projectName = Host.ResolveAssemblyReference("$(ProjectName)");
+            //"MYSQL": "server=localhost;user id=root;pwd=123456;database=individualtax;SslMode = none;Charset=utf8",
+            //"SQLSERVER": "server=weiapp.pw;user id=sa;pwd=Lhsm7800525;database=wzgx",
+            //"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.0.102)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL)));User Id=EQUIPMENT;Password=123456",//连接符字串
+            ConnectionConfig SqlSugarConfig = new ConnectionConfig()
+            {
+                ConnectionString = "server=localhost;user id=root;pwd=root;database=jygl;SslMode = none;Charset=utf8",//连接符字串
+                DbType = DbType.MySql,
+                IsAutoCloseConnection = true
+            };
+            var db = new SqlSugarClient(SqlSugarConfig);
+            db.DbFirst.CreateClassFile(projectDir + "Entity","SqlSugarAndEntity");
+
+
+#>

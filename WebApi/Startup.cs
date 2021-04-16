@@ -22,6 +22,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using PublicWebApi.Common.Validator;
+using SqlSugarAndEntity;
 using TimedTask;
 using WebApi.Common.EFCoreCommon;
 
@@ -142,6 +143,7 @@ namespace WebApi
                 .Where(x => x.Name.EndsWith("Repository", StringComparison.OrdinalIgnoreCase)).AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(Assembly.Load("Services"))//注册服务层所有的服务类和其对应的接口
                 .Where(x => x.Name.EndsWith("Service", StringComparison.OrdinalIgnoreCase)).AsImplementedInterfaces();
+            builder.RegisterType<BaseMethod>().As<IBaseMethod>().AsImplementedInterfaces();
             builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().AsImplementedInterfaces();
         }
 
