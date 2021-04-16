@@ -20,8 +20,8 @@ namespace SqlSugarAndEntity
             _config = new ConnectionConfig();
             _config.ConnectionString = config.GetSection($"MasterConnetion").Value;
             _config.IsAutoCloseConnection = true;
-            string DBType = config.GetSection("DBType").ToString().ToUpper();
-            int SlaveCount = Convert.ToInt32(config.GetSection("SlaveCount"));
+            string DBType = config.GetSection("DBType").Value.ToUpper();
+            int SlaveCount = Convert.ToInt32(config.GetSection("SlaveCount").Value);
             switch (DBType)
             {
                 case "SQLSERVER":
@@ -49,6 +49,7 @@ namespace SqlSugarAndEntity
                     _config.SlaveConnectionConfigs.Add(slaveConnectionConfig);
                 }
             }
+
         }
     }
 }
