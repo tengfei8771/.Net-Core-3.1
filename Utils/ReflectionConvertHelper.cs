@@ -15,41 +15,6 @@ namespace Utils
     /// </summary>
     public static class ReflectionConvertHelper
     {
-        /// <summary>
-        /// 根据反射属性类型转换对应的值
-        /// </summary>
-        /// <param name="PropName">属性名称</param>
-        /// <param name="value">属性的值</param>
-        /// <returns></returns>
-        public static dynamic ConvertByAttribute(string PropName,object value)
-        {
-            try
-            {
-                switch (PropName.ToLower())
-                {
-                    case "string":
-                        return value.ToString();
-                    case "decimal":
-                        return Convert.ToDecimal(value);
-                    case "boolean":
-                        return Convert.ToBoolean(value);
-                    case "datetime":
-                        return Convert.ToDateTime(value);
-                    case "int":
-                        return Convert.ToInt32(value);
-                    case "short":
-                        return Convert.ToInt16(value);
-                    case "long":
-                        return Convert.ToInt64(value);
-                    default:
-                        return value;
-                }
-            }
-            catch(Exception e)
-            {
-                throw;
-            }
-        }
         public static T ConvertType<T>(object val)
         {
             if (val == null) return default(T);//返回类型的默认值

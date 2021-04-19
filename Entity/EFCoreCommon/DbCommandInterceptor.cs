@@ -6,12 +6,12 @@ using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebApi.Common.EFCoreCommon
+namespace Entity.EFCoreCommon
 {
     public class DbCommandInterceptor : IObserver<KeyValuePair<string, object>>
     {
-        private const string masterConnectionString = "server=localhost;user id=sa;pwd=sa;database=AppDB";
-        private const string slaveConnectionString = "server=localhost;user id=sa;pwd=sa;database=AppDB1";
+        private string masterConnectionString = null;
+        private string slaveConnectionString = null;
         public void OnCompleted()
         {
             
@@ -24,6 +24,7 @@ namespace WebApi.Common.EFCoreCommon
 
         public void OnNext(KeyValuePair<string, object> value)
         {
+            masterConnectionString = EFCoreExtensions.config.MasterConnetion;
             if (value.Key == RelationalEventId.CommandExecuting.Name)
             {
                 var command = ((CommandEventData)value.Value).Command;
@@ -35,10 +36,12 @@ namespace WebApi.Common.EFCoreCommon
                 }
                 else if (executeMethod == DbCommandMethod.ExecuteScalar)
                 {
+                    slaveConnectionString = EFCoreExtensions.GetConnectionString();
                     ResetConnection(command, slaveConnectionString);
                 }
                 else if (executeMethod == DbCommandMethod.ExecuteReader)
                 {
+                    slaveConnectionString = EFCoreExtensions.GetConnectionString();
                     ResetConnection(command, slaveConnectionString);
                 }
                 

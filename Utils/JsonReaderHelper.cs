@@ -1,9 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Utils
@@ -46,6 +49,13 @@ namespace Utils
                 }
 
             }
+        }
+
+        public T GetConfig<T>(string JsonFileName)
+        {
+            var _builder = new ConfigurationBuilder();
+            var config = _builder.Add(new JsonConfigurationSource { Path = "DBConfig.json", Optional = false, ReloadOnChange = true }).Build();
+            return config.Get<T>();
         }
     }
 }

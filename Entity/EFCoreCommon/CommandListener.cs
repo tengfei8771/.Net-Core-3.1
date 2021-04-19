@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebApi.Common.EFCoreCommon
+namespace Entity.EFCoreCommon
 {
     public class CommandListener: IObserver<DiagnosticListener>
     {

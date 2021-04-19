@@ -8,6 +8,8 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Autofac;
 using ConsulBuilder;
+using Entity;
+using Entity.EFCoreCommon;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +26,6 @@ using Newtonsoft.Json.Serialization;
 using PublicWebApi.Common.Validator;
 using SqlSugarAndEntity;
 using TimedTask;
-using WebApi.Common.EFCoreCommon;
 
 namespace WebApi
 {
@@ -108,7 +109,8 @@ namespace WebApi
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
             services.AddQuartz(typeof(StandardsJob));
-            services.AddDbContext<Entity.Models.AppDBContext>(options => options.UseSqlServer("server=localhost;user id=sa;pwd=sa;database=AppDB"));
+            services.AddContext();
+            //services.AddDbContext<Entity.Models.AppDBContext>(options => options.UseSqlServer("server=localhost;user id=sa;pwd=sa;database=AppDB"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
