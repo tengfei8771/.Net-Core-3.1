@@ -53,9 +53,16 @@ namespace Utils
 
         public T GetConfig<T>(string JsonFileName)
         {
-            var _builder = new ConfigurationBuilder();
-            var config = _builder.Add(new JsonConfigurationSource { Path = "DBConfig.json", Optional = false, ReloadOnChange = true }).Build();
-            return config.Get<T>();
+            var path= Assembly.GetEntryAssembly().Location.Replace($"{Assembly.GetEntryAssembly().GetName().Name}.dll", $"{JsonFileName}.json");
+            using (StreamReader file = File.OpenText(path))
+            {
+                using (JsonTextReader reader = new JsonTextReader(file))
+                {
+                    JObject o = (JObject)JToken.ReadFrom(reader);
+                    return o.ToObject<T>();
+                }
+
+            }
         }
     }
 }

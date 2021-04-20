@@ -60,10 +60,10 @@ namespace Entity
                 {
                     JsonConfig.HitLimit = config.SlaveConnetions[NextIndex].HitLimit + JsonConfig.HitRate;
                 }
-                if(config.SlaveConnetions.IndexOf(JsonConfig)== config.SlaveConnetions.Count - 1)
-                {
-                    MaxHitLimit += JsonConfig.HitRate;
-                }
+                //if(config.SlaveConnetions.IndexOf(JsonConfig)== config.SlaveConnetions.Count - 1)
+                //{
+                //    MaxHitLimit += JsonConfig.HitRate;
+                //}
                 slaveconnetions.Add(JsonConfig);
             }
             config.MaxHitLimit = MaxHitLimit;
